@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power BI 快捷鍵高級查詢工具</title>
+    <style>
+        :root {
+            /* Power BI 品牌配色 */
+            --primary-color: #f2c811; /* Power BI Yellow */
+            --secondary-color: #333333;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #212529;
+            --text-sub: #6c757d;
+            --accent-blue: #0078d4;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", "Microsoft JhengHei", sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        h1 span { color: var(--accent-blue); }
+
+        .search-area {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 18px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 4px rgba(0, 120, 212, 0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .chip {
+            padding: 8px 18px;
+            background: #eee;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition);
+            color: var(--text-sub);
+        }
+
+        .chip.active, .chip:hover {
+            background: var(--secondary-color);
+            color: var(--primary-color);
+        }
+
+        .results-info {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        /* 1x3 Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 992px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #f0f0f0;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+
+        .card-tag {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-blue);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .card-key {
+            display: inline-block;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-bottom: 3px solid #ced4da;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 15px;
+            align-self: flex-start;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--secondary-color);
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: var(--text-sub);
+            flex-grow: 1;
+        }
+
+        .copy-hint {
+            margin-top: 15px;
+            font-size: 11px;
+            color: #ccc;
+            text-align: right;
+            font-style: italic;
+        }
+
+        .no-data {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 100px;
+            color: #ccc;
+        }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--secondary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Power BI <span>Shortcuts</span></h1>
+        <p>快速檢索 DAX、Power Query 與報表設計快捷鍵</p>
+    </header>
+
+    <div class="search-area">
+        <div class="input-group">
+            <input type="text" id="searchInput" placeholder="輸入關鍵字 (如: DAX, 複製, Ctrl...)" autocomplete="off">
+        </div>
+        <div class="filter-group" id="filterGroup">
+            <div class="chip active" data-cat="全部">全部</div>
+            <div class="chip" data-cat="通用 (General)">通用</div>
+            <div class="chip" data-cat="報表導覽 (Navigation)">報表導覽</div>
+            <div class="chip" data-cat="DAX 編輯器 (DAX Editor)">DAX 編輯</div>
+            <div class="chip" data-cat="視覺佈局 (Visual Layout)">視覺佈局</div>
+            <div class="chip" data-cat="Power Query">Power Query</div>
+        </div>
+    </div>
+
+    <div class="results-info">
+        <span id="counter">找到 0 筆快捷鍵</span>
+    </div>
+
+    <div class="grid" id="shortcutGrid">
+        <!-- 內容由 JS 動態生成 -->
+    </div>
+</div>
+
+<div id="toast">已複製到剪貼簿</div>
+
+<script>
+    // 從 CSV 轉換而來的結構化數據
+    const shortcuts = [
+        {"cat":"通用 (General)","key":"Ctrl + S","desc":"儲存報表","note":"儲存目前編輯的 Power BI 報表 (.pbix)"},
+        {"cat":"通用 (General)","key":"Ctrl + Z","desc":"復原 (Undo)","note":"撤銷上一步操作"},
+        {"cat":"通用 (General)","key":"Ctrl + Y","desc":"重做 (Redo)","note":"重新執行剛才復原的操作"},
+        {"cat":"通用 (General)","key":"Ctrl + C","desc":"複製","note":"複製選取的視覺效果或文字"},
+        {"cat":"通用 (General)","key":"Ctrl + V","desc":"貼上","note":"貼上複製的視覺效果或文字"},
+        {"cat":"通用 (General)","key":"Ctrl + A","desc":"全選","note":"選擇目前頁面上的所有視覺效果"},
+        {"cat":"通用 (General)","key":"Delete","desc":"刪除","note":"刪除選取的視覺效果或欄位"},
+        {"cat":"通用 (General)","key":"F2","desc":"重新命名","note":"重新命名選取的視覺效果、頁面或欄位"},
+        {"cat":"通用 (General)","key":"Ctrl + F","desc":"搜尋","note":"在資料窗格中搜尋欄位或量值"},
+        {"cat":"通用 (General)","key":"Alt + F4","desc":"關閉應用程式","note":"關閉 Power BI Desktop"},
+        {"cat":"報表導覽 (Navigation)","key":"Ctrl + Page Down","desc":"下一頁","note":"切換至報表的下一個頁面"},
+        {"cat":"報表導覽 (Navigation)","key":"Ctrl + Page Up","desc":"上一頁","note":"切換至報表的上一個頁面"},
+        {"cat":"報表導覽 (Navigation)","key":"Ctrl + Shift + Enter","desc":"進入視覺效果焦點模式","note":"聚焦放大的視覺效果 (Focus mode)"},
+        {"cat":"報表導覽 (Navigation)","key":"Esc","desc":"退出焦點模式 / 退出選取","note":"離開焦點模式或取消選取對象"},
+        {"cat":"報表導覽 (Navigation)","key":"Ctrl + Shift + F6","desc":"窗格間導覽","note":"在視覺效果、窗格與功能區之間切換焦點"},
+        {"cat":"報表導覽 (Navigation)","key":"Tab","desc":"下一個元件","note":"在畫面的下一個可選取元件/視覺效果間移動"},
+        {"cat":"報表導覽 (Navigation)","key":"Shift + Tab","desc":"上一個元件","note":"在畫面的上一個可選取元件/視覺效果間移動"},
+        {"cat":"報表導覽 (Navigation)","key":"Alt + Shift + F11","desc":"顯示資料表格","note":"切換視覺效果的底層資料表格檢視"},
+        {"cat":"DAX 編輯器 (DAX Editor)","key":"Shift + Enter","desc":"DAX 換行","note":"在 DAX 公式編輯器中換行不執行"},
+        {"cat":"DAX 編輯器 (DAX Editor)","key":"Ctrl + Space","desc":"觸發 IntelliSense","note":"手動呼叫自動完成與函數提示列表"},
+        {"cat":"DAX 編輯器 (DAX Editor)","key":"Ctrl + /","desc":"單行註解","note":"將選取的 DAX 程式碼加上/取消 // 註解"},
+        {"cat":"DAX 編輯器 (DAX Editor)","key":"Shift + Alt + A","desc":"多行/區塊註解","note":"將選取的 DAX 程式碼加上/取消 /* */ 註解"},
+        {"cat":"DAX 編輯器 (DAX Editor)","key":"Ctrl + Shift + L","desc":"選取所有匹配項","note":"選取目前檔案中所有相同的變數或欄位名稱"},
+        {"cat":"DAX 編輯器 (DAX Editor)","key":"Ctrl + D","desc":"選取下一個匹配項","note":"逐一選取下一個相同的變數或欄位名稱"},
+        {"cat":"DAX 編輯器 (DAX Editor)","key":"Alt + Up / Down","desc":"移動整行程式碼","note":"將目前行向上或向下移動"},
+        {"cat":"DAX 編輯器 (DAX Editor)","key":"Shift + Alt + Up / Down","desc":"複製整行程式碼","note":"向上或向下複製目前行"},
+        {"cat":"DAX 編輯器 (DAX Editor)","key":"Tab / Shift + Tab","desc":"增加 / 減少縮排","note":"調整程式碼縮排排版"},
+        {"cat":"DAX 編輯器 (DAX Editor)","key":"Esc","desc":"取消編輯","note":"放棄公式列的變更並退出編輯"},
+        {"cat":"視覺佈局 (Visual Layout)","key":"方向鍵","desc":"微移視覺效果","note":"將選取的視覺效果移動 1 像素 (Up/Down/Left/Right)"},
+        {"cat":"視覺佈局 (Visual Layout)","key":"Shift + 方向鍵","desc":"快速移動視覺效果","note":"將選取的視覺效果向指定方向移動 10 像素"},
+        {"cat":"視覺佈局 (Visual Layout)","key":"Ctrl + Click","desc":"複選視覺效果","note":"選擇多個視覺效果進行群組或對齊"},
+        {"cat":"視覺佈局 (Visual Layout)","key":"Ctrl + G","desc":"建立群組","note":"將多個選取的視覺效果組成群組 (Group)"},
+        {"cat":"視覺佈局 (Visual Layout)","key":"Ctrl + Shift + G","desc":"解開群組","note":"取消視覺效果的群組化"},
+        {"cat":"Power Query","key":"Alt + Shift + P","desc":"開啟/關閉套用的步驟","note":"顯示或隱藏右側「套用的步驟」窗格"},
+        {"cat":"Power Query","key":"Alt + Enter","desc":"檢視步驟屬性","note":"開啟目前選取步驟的屬性對話框"},
+        {"cat":"Power Query","key":"Ctrl + Shift + M","desc":"開啟進階編輯器","note":"開啟 M 語言進階編輯器 (Advanced Editor)"},
+        {"cat":"Power Query","key":"F2","desc":"重新命名步驟/查詢","note":"修改選取查詢或步驟的名稱"},
+        {"cat":"Power Query","key":"Ctrl+Alt+Shift+C","desc":"複製表格內容","note":"複製預覽資料格內的所有內容"}
+    ];
+
+    let currentCat = "全部";
+
+    function render() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const grid = document.getElementById('shortcutGrid');
+        
+        const filtered = shortcuts.filter(s => {
+            const matchCat = (currentCat === "全部" || s.cat === currentCat);
+            const matchQuery = s.key.toLowerCase().includes(query) || 
+                               s.desc.toLowerCase().includes(query) || 
+                               s.note.toLowerCase().includes(query);
+            return matchCat && matchQuery;
+        });
+
+        document.getElementById('counter').innerText = `找到 ${filtered.length} 筆快捷鍵`;
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `<div class="no-data">沒有找到符合的快捷鍵...</div>`;
+            return;
+        }
+
+        grid.innerHTML = filtered.map(s => `
+            <div class="card" onclick="copyToClipboard('${s.key}')">
+                <div class="card-tag">${s.cat}</div>
+                <div class="card-key">${s.key}</div>
+                <div class="card-title">${s.desc}</div>
+                <div class="card-desc">${s.note}</div>
+                <div class="copy-hint">點擊卡片複製按鍵</div>
+            </div>
+        `).join('');
+    }
+
+    // 複製功能
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        });
+    }
+
+    // 分類切換
+    document.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            currentCat = this.getAttribute('data-cat');
+            render();
+        });
+    });
+
+    // 搜尋輸入監聽
+    document.getElementById('searchInput').addEventListener('input', render);
+
+    // 初始化渲染
+    render();
+</script>
+
+</body>
+</html>
